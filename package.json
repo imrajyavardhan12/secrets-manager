@@ -1,5 +1,5 @@
 {
-  "name": "secrets-manager",
+  "name": "secrets-cli",
   "version": "1.0.0",
   "description": "A local-first, encrypted secrets manager for developers",
   "type": "module",
@@ -34,8 +34,28 @@
     "variables",
     "encryption",
     "security",
-    "cli"
+    "cli",
+    "env",
+    "dotenv",
+    "vault",
+    "password-manager"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "Rajyavardhan Singh <srajyavardhan12@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imrajyavardhan12/secrets-manager.git"
+  },
+  "homepage": "https://github.com/imrajyavardhan12/secrets-manager#readme",
+  "bugs": {
+    "url": "https://github.com/imrajyavardhan12/secrets-manager/issues"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  }
 }
