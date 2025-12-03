@@ -12,12 +12,14 @@ A local-first, encrypted secrets manager for developers. Store API keys, passwor
 
 ## Installation
 
-```bash
-# Using bun
-bun install -g secrets-cli
+**Requires [Bun](https://bun.sh) runtime**
 
-# Using npm
-npm install -g secrets-cli
+```bash
+# Install Bun first (if not installed)
+curl -fsSL https://bun.sh/install | bash
+
+# Then install secrets-cli
+bun install -g secrets-cli
 ```
 
 ## Quick Start
@@ -141,7 +143,7 @@ secrets import team-secrets.enc
 
 ## Requirements
 
-- [Bun](https://bun.sh) v1.0+ or Node.js 18+
+- [Bun](https://bun.sh) v1.0+ (required - this CLI uses Bun-specific APIs)
 - macOS, Linux, or Windows (WSL2)
 
 ## Contributing

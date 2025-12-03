@@ -4,14 +4,15 @@
   "description": "A local-first, encrypted secrets manager for developers",
   "type": "module",
   "bin": {
-    "secrets": "./src/cli/index.ts"
+    "secrets": "./dist/index.js"
   },
   "scripts": {
     "dev": "bun run src/cli/index.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
-    "build": "bun build src/cli/index.ts --outdir dist --target bun",
+    "build": "bun build src/cli/index.ts --outdir dist --target bun --minify",
+    "prepublishOnly": "bun run build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -51,7 +52,7 @@
     "url": "https://github.com/imrajyavardhan12/secrets-manager/issues"
   },
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
