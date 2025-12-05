@@ -1,6 +1,6 @@
 {
   "name": "secrets-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A local-first, encrypted secrets manager for developers",
   "type": "module",
   "bin": {
