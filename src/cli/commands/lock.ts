@@ -14,7 +14,8 @@ export function createLockCommand(): Command {
           return;
         }
 
-        if (vault.isLocked()) {
+        // Check both in-memory state AND session file
+        if (vault.isLocked() && !vault.hasActiveSession()) {
           info('Vault is already locked');
           return;
         }

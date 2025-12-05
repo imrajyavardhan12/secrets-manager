@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword } from '../prompts.js';
+import { ensureUnlocked } from '../prompts.js';
 import { success, warning, info, displayError } from '../output.js';
 import chalk from 'chalk';
 
@@ -19,10 +19,7 @@ export function createHealthCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         console.log();
         console.log(chalk.bold('Vault Health Report'));

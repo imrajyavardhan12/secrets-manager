@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { readFileSync, existsSync } from 'fs';
 import { createDecipheriv, pbkdf2Sync } from 'crypto';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword, promptImportPassword, promptImportConfirmation } from '../prompts.js';
+import { ensureUnlocked, promptImportPassword, promptImportConfirmation } from '../prompts.js';
 import { success, info, displayError, error } from '../output.js';
 import { PBKDF2_ITERATIONS } from '../../utils/constants.js';
 import { SecretAlreadyExistsError } from '../../utils/errors.js';
@@ -36,10 +36,7 @@ export function createImportCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         const importPassword = options.password ?? await promptImportPassword();
 

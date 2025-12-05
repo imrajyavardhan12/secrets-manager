@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword } from '../prompts.js';
+import { ensureUnlocked } from '../prompts.js';
 import { printAuditTable, displayError, info } from '../output.js';
 import type { AuditAction } from '../../types/index.js';
 
@@ -20,10 +20,7 @@ export function createAuditCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         const auditLogger = vault.getAuditLogger();
         if (!auditLogger) {

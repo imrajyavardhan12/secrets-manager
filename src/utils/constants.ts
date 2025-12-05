@@ -5,6 +5,7 @@ export const SECRETS_DIR = join(homedir(), '.secrets');
 export const VAULT_DB_PATH = join(SECRETS_DIR, 'vault.db');
 export const CONFIG_PATH = join(SECRETS_DIR, 'config.json');
 export const BACKUPS_DIR = join(SECRETS_DIR, 'backups');
+export const SESSION_FILE_PATH = join(SECRETS_DIR, 'session');
 
 export const SCHEMA_VERSION = '1.0.0';
 export const APP_VERSION = '1.0.0';

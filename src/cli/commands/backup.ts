@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
 import { BackupManager } from '../../core/backup.js';
-import { promptMasterPassword } from '../prompts.js';
+import { ensureUnlocked } from '../prompts.js';
 import { success, info, displayError } from '../output.js';
 import { statSync } from 'fs';
 
@@ -18,10 +18,7 @@ export function createBackupCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         const backupManager = new BackupManager();
         const { path, metadata } = backupManager.createBackup(options.output);

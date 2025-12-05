@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { writeFileSync } from 'fs';
 import { createCipheriv, pbkdf2Sync, randomBytes } from 'crypto';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword, promptExportPassword, promptSelectSecrets } from '../prompts.js';
+import { ensureUnlocked, promptExportPassword, promptSelectSecrets } from '../prompts.js';
 import { success, warning, info, displayError } from '../output.js';
 import { validateEnvironment } from '../../utils/validation.js';
 import { PBKDF2_ITERATIONS, FILE_PERMISSIONS } from '../../utils/constants.js';
@@ -23,10 +23,7 @@ export function createExportCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         let environment: Environment | undefined;
         if (options.env) {

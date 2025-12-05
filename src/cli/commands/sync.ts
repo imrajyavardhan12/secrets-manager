@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { Database } from 'bun:sqlite';
 import { getVaultManager } from '../../core/vault.js';
 import { ProjectManager } from '../../core/project.js';
-import { promptMasterPassword } from '../prompts.js';
+import { ensureUnlocked } from '../prompts.js';
 import { success, info, displayError, printSyncedSecrets } from '../output.js';
 import { validateEnvironment } from '../../utils/validation.js';
 import { VAULT_DB_PATH, ENV_FILE } from '../../utils/constants.js';
@@ -24,10 +24,7 @@ export function createSyncCommand(): Command {
           process.exit(1);
         }
 
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         const projectPath = process.cwd();
         const db = new Database(VAULT_DB_PATH);

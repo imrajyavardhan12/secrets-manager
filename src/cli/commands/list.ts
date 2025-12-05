@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword } from '../prompts.js';
+import { ensureUnlocked } from '../prompts.js';
 import { printSecretsTable, printSecretsJson, displayError } from '../output.js';
 import { validateEnvironment, isValidEnvironment } from '../../utils/validation.js';
 import type { Environment } from '../../types/index.js';
@@ -16,11 +16,7 @@ export function createListCommand(): Command {
     .action(async (options) => {
       try {
         const vault = getVaultManager();
-
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         let environment: Environment | undefined;
         if (options.env) {

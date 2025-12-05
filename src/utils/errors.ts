@@ -130,3 +130,15 @@ export class SecretValueTooLargeError extends SecretsError {
     super(`Secret value exceeds maximum size of ${Math.round(maxSize / 1024)}KB.`, 'VALUE_TOO_LARGE');
   }
 }
+
+export class SessionExpiredError extends SecretsError {
+  constructor() {
+    super('Session expired. Please unlock the vault again.', 'SESSION_EXPIRED');
+  }
+}
+
+export class SessionInvalidError extends SecretsError {
+  constructor() {
+    super('Invalid session. Please unlock the vault again.', 'SESSION_INVALID');
+  }
+}

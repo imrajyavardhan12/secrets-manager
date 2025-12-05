@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { validatePassword } from '../utils/validation.js';
 import { PasswordMismatchError, InvalidPasswordError } from '../utils/errors.js';
+import { VaultManager } from '../core/vault.js';
 
 export async function promptPassword(message: string = 'Password'): Promise<string> {
   const { password } = await inquirer.prompt([
@@ -179,4 +180,20 @@ export async function promptRotateConfirmation(key: string, envCount: number): P
     `Update ${key} in ${envCount} environment${envCount !== 1 ? 's' : ''}?`,
     true
   );
+}
+
+export async function ensureUnlocked(vault: VaultManager): Promise<void> {
+  // Already unlocked in memory
+  if (!vault.isLocked()) {
+    return;
+  }
+
+  // Try to unlock from session first (no password prompt needed)
+  if (vault.unlockFromSession()) {
+    return;
+  }
+
+  // Session not available or expired, prompt for password
+  const password = await promptMasterPassword();
+  vault.unlock(password);
 }

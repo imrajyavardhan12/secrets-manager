@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword, promptSecretValue, promptRotateConfirmation } from '../prompts.js';
+import { ensureUnlocked, promptSecretValue, promptRotateConfirmation } from '../prompts.js';
 import { success, warning, info, displayError, error } from '../output.js';
 import { validateSecretKey, validateEnvironment } from '../../utils/validation.js';
 import { EmptyValueError } from '../../utils/errors.js';
@@ -17,11 +17,7 @@ export function createRotateCommand(): Command {
         validateSecretKey(key);
 
         const vault = getVaultManager();
-
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         const secrets = vault.listSecrets().filter(s => s.key === key);
         

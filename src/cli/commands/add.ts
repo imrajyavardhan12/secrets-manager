@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword, promptSecretValue, promptOverwrite } from '../prompts.js';
+import { ensureUnlocked, promptSecretValue, promptOverwrite } from '../prompts.js';
 import { success, displayError, info } from '../output.js';
 import { validateSecretKey, validateEnvironment } from '../../utils/validation.js';
 import { VaultLockedError, SecretAlreadyExistsError, EmptyValueError } from '../../utils/errors.js';
@@ -21,11 +21,7 @@ export function createAddCommand(): Command {
         const environment = validateEnvironment(options.env);
 
         const vault = getVaultManager();
-
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         if (!value) {
           value = await promptSecretValue(key);

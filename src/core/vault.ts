@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import type { Secret, SecretRow, Environment, VaultState, RuntimeState } from '../types/index.js';
 import { CryptoManager } from './crypto.js';
 import { AuditLogger } from './audit.js';
+import { SessionManager, getSessionManager } from './session.js';
 import {
   initializeDatabase,
   setVaultMeta,
@@ -35,6 +36,7 @@ export class VaultManager {
   private db: Database | null = null;
   private cryptoManager: CryptoManager | null = null;
   private auditLogger: AuditLogger | null = null;
+  private sessionManager: SessionManager;
   private dbPath: string;
   private state: RuntimeState = {
     masterKey: null,
@@ -48,6 +50,7 @@ export class VaultManager {
 
   constructor(dbPath: string = VAULT_DB_PATH) {
     this.dbPath = dbPath;
+    this.sessionManager = getSessionManager();
     this.checkInitialization();
   }
 
@@ -64,7 +67,13 @@ export class VaultManager {
   }
 
   isLocked(): boolean {
+    // Only check in-memory state - is the vault actually ready to use?
     return this.cryptoManager === null;
+  }
+
+  hasActiveSession(): boolean {
+    // Check if there's a valid session file that can be used to unlock
+    return this.sessionManager.hasValidSession();
   }
 
   getState(): VaultState {
@@ -92,6 +101,39 @@ export class VaultManager {
     this.state.vaultState = 'unlocked' as VaultState;
     this.autoLockTimeout = (options.timeout ?? DEFAULT_AUTO_LOCK_TIMEOUT) * 60 * 1000;
     this.startAutoLockTimer();
+
+    // Save session for persistence across CLI invocations
+    const timeoutMinutes = options.timeout ?? DEFAULT_AUTO_LOCK_TIMEOUT;
+    this.sessionManager.saveSession(this.cryptoManager.getMasterKey(), timeoutMinutes);
+  }
+
+  unlockFromSession(): boolean {
+    if (!this.isInitialized()) {
+      return false;
+    }
+
+    const masterKey = this.sessionManager.loadSession();
+    if (!masterKey) {
+      return false;
+    }
+
+    this.db = new Database(this.dbPath);
+    this.cryptoManager = CryptoManager.createFromMasterKey(masterKey);
+    this.auditLogger = new AuditLogger(this.db);
+    this.state.vaultState = 'unlocked' as VaultState;
+
+    const timeoutStr = getVaultMeta(this.db, 'auto_lock_timeout');
+    this.autoLockTimeout = parseInt(timeoutStr ?? String(DEFAULT_AUTO_LOCK_TIMEOUT)) * 60 * 1000;
+    this.startAutoLockTimer();
+
+    // Extend session on activity
+    this.sessionManager.extendSession(Math.ceil(this.autoLockTimeout / 60000));
+
+    return true;
+  }
+
+  hasValidSession(): boolean {
+    return this.sessionManager.hasValidSession();
   }
 
   unlock(password: string, options: { timeout?: number } = {}): boolean {
@@ -152,8 +194,12 @@ export class VaultManager {
     this.state.vaultState = 'unlocked' as VaultState;
 
     const timeoutStr = getVaultMeta(this.db, 'auto_lock_timeout');
-    this.autoLockTimeout = (options.timeout ?? parseInt(timeoutStr ?? String(DEFAULT_AUTO_LOCK_TIMEOUT))) * 60 * 1000;
+    const timeoutMinutes = options.timeout ?? parseInt(timeoutStr ?? String(DEFAULT_AUTO_LOCK_TIMEOUT));
+    this.autoLockTimeout = timeoutMinutes * 60 * 1000;
     this.startAutoLockTimer();
+
+    // Save session for persistence across CLI invocations
+    this.sessionManager.saveSession(this.cryptoManager.getMasterKey(), timeoutMinutes);
 
     return true;
   }
@@ -184,6 +230,9 @@ export class VaultManager {
 
   lock(): void {
     this.clearAutoLockTimer();
+
+    // Delete session file
+    this.sessionManager.deleteSession();
 
     if (this.cryptoManager) {
       this.cryptoManager.clearMasterKey();

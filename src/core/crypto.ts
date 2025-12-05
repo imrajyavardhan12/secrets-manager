@@ -78,6 +78,16 @@ export class CryptoManager {
     }
   }
 
+  getMasterKey(): Uint8Array {
+    return this.masterKey;
+  }
+
+  static createFromMasterKey(masterKey: Uint8Array): CryptoManager {
+    const instance = Object.create(CryptoManager.prototype);
+    instance.masterKey = masterKey;
+    return instance;
+  }
+
   verifyPassword(testValue: string, encryptedTestValue: string): boolean {
     try {
       const decrypted = this.decrypt(encryptedTestValue);

@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getVaultManager } from '../../core/vault.js';
-import { promptMasterPassword, promptDeleteConfirmation, promptConfirmation } from '../prompts.js';
+import { ensureUnlocked, promptDeleteConfirmation, promptConfirmation } from '../prompts.js';
 import { success, displayError, info } from '../output.js';
 import { validateSecretKey, validateEnvironment } from '../../utils/validation.js';
 import type { Environment } from '../../types/index.js';
@@ -20,11 +20,7 @@ export function createDeleteCommand(): Command {
         const environment = validateEnvironment(options.env);
 
         const vault = getVaultManager();
-
-        if (vault.isLocked()) {
-          const password = await promptMasterPassword();
-          vault.unlock(password);
-        }
+        await ensureUnlocked(vault);
 
         if (options.allEnvs) {
           if (!options.force) {

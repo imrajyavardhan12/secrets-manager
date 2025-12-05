@@ -16,8 +16,15 @@ export function createUnlockCommand(): Command {
           return;
         }
 
+        // Check if already unlocked in memory
         if (!vault.isLocked()) {
           info('Vault is already unlocked');
+          return;
+        }
+
+        // Check if there's an active session
+        if (vault.hasActiveSession()) {
+          info('Vault is already unlocked (active session)');
           return;
         }
 
