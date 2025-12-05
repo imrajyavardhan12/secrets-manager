@@ -8,7 +8,7 @@ export const BACKUPS_DIR = join(SECRETS_DIR, 'backups');
 export const SESSION_FILE_PATH = join(SECRETS_DIR, 'session');
 
 export const SCHEMA_VERSION = '1.0.0';
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.0.3';
 
 export const PBKDF2_ITERATIONS = 100000;
 export const SALT_LENGTH = 16;
